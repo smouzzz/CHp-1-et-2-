@@ -73,7 +73,44 @@
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
 
-    <div class="w-full max-w-md mx-auto">
+    <!-- ===== NOUVEAU: Conteneur de Connexion ===== -->
+    <div id="login-container" class="w-full max-w-md mx-auto text-center p-6 bg-white rounded-lg shadow-xl">
+        <!-- 
+            NOTE: L'image 'image_2482dd.jpg' doit être dans le MÊME DOSSIER
+            que ce fichier HTML pour s'afficher.
+        -->
+        <img src="https://i.ytimg.com/vi/qA2yuzGhElk/maxresdefault.jpg" alt="Le Méga Boss" class="w-48 h-auto mx-auto rounded-lg mb-6 shadow-md" onerror="this.src='https://placehold.co/192x256/333/fff?text=M%C3%A9ga+Boss'; this.onerror=null;">
+        
+        <!-- Le 'whitespace-pre-line' respecte vos sauts de ligne -->
+        <p class="text-gray-700 text-sm mb-4 whitespace-pre-line">
+💀 Salut à toi, jeune fiscalité perdue !
+Te voilà encore une fois face au grand portail de la souffrance comptable.
+
+Ici, les bilans ne s’équilibrent jamais, les comptes 401 te jugent, et les immobilisations pleurent dans les tableaux Excel.
+Mais avant d’entrer dans le temple du débit et du crédit…
+Entre le mot de passe que le Méga Boss a dû te donner.
+
+(S’il ne te l’a pas donné, c’est que t’as oublié de faire le virement. Reviens quand ce sera fait.) 💸
+Souviens-toi : No pain, no gain — ou comme on dit chez nous, pas de douleur, pas de résultat d’exploitation.
+Allez, courage petit soldat du plan comptable.
+
+Que tes écritures soient justes, et que tes soldes ne soient jamais débiteurs. 📊🔥
+        </p>
+
+        <div class="mt-6">
+            <input type="password" id="password-input" placeholder="Mot de passe..." class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <button id="login-button" class="w-full bg-blue-600 text-white py-2 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-colors mt-4 font-semibold">
+            Entrer
+        </button>
+
+        <p id="error-message" class="text-red-500 text-sm mt-3 hidden">Mot de passe incorrect. Essaie encore, soldat.</p>
+    </div>
+
+
+    <!-- ===== ANCIENNE APP: Conteneur des Flashcards (caché par défaut) ===== -->
+    <div id="app-container" class="w-full max-w-md mx-auto hidden">
         <!-- Titre -->
         <header class="text-center mb-6">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Flashcards de Fiscalité</h1>
@@ -119,6 +156,13 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Références DOM pour la Connexion ---
+            const loginContainer = document.getElementById('login-container');
+            const appContainer = document.getElementById('app-container');
+            const passwordInput = document.getElementById('password-input');
+            const loginButton = document.getElementById('login-button');
+            const errorMessage = document.getElementById('error-message');
             
             // --- 1. Données (Extraites de vos PDF) ---
             const flashcards = [
@@ -316,7 +360,7 @@
             let currentCardIndex = 0;
             let isFlipped = false;
 
-            // --- 3. Références DOM ---
+            // --- 3. Références DOM pour l'App ---
             const flashcard = document.getElementById('flashcard');
             const flashcardFront = document.getElementById('flashcard-front');
             const flashcardBack = document.getElementById('flashcard-back');
@@ -324,7 +368,7 @@
             const difficultyButtons = document.querySelectorAll('.difficulty-btn');
             const helperText = document.getElementById('helper-text');
 
-            // --- 4. Fonctions ---
+            // --- 4. Fonctions de l'App ---
 
             /**
              * Initialise le "deck" de cartes avec un poids par défaut.
@@ -420,6 +464,33 @@
 
             // --- 5. Écouteurs d'événements ---
 
+            // Écouteur pour le bouton de connexion
+            loginButton.addEventListener('click', () => {
+                if (passwordInput.value === 'stage') {
+                    // Mot de passe correct
+                    loginContainer.classList.add('hidden');
+                    appContainer.classList.remove('hidden');
+                    errorMessage.classList.add('hidden');
+                    
+                    // --- 6. Initialisation de l'app ---
+                    initializeApp(); // Démarrer l'application SEULEMENT MAINTENANT
+
+                } else {
+                    // Mot de passe incorrect
+                    errorMessage.classList.remove('hidden');
+                    passwordInput.value = ''; // Vider le champ
+                    passwordInput.focus(); // Remettre le focus
+                }
+            });
+
+            // Permettre de valider avec "Entrée"
+            passwordInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Empêche le comportement par défaut (si c'est dans un formulaire)
+                    loginButton.click(); // Simuler un clic sur le bouton
+                }
+            });
+
             // Cliquer sur la carte pour la retourner
             flashcard.addEventListener('click', flipCard);
 
@@ -429,7 +500,8 @@
             });
 
             // --- 6. Initialisation ---
-            initializeApp(); // Démarrer l'application
+            // initializeApp(); // On ne démarre PAS l'application tout de suite.
+            passwordInput.focus(); // Mettre le focus sur le champ mot de passe au chargement
 
         });
     </script>
