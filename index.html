@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards Fiscalité (BIC)</title>
+    <!-- Chargement de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chargement de la police Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ... (Styles CSS identiques à la version précédente) ... */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .flashcard-container {
+            perspective: 1000px;
+        }
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .flashcard-front {
+            background-color: white;
+            color: #111827;
+        }
+        .flashcard-back {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            transform: rotateY(180deg);
+            border: 1px solid #d1d5db;
+        }
+        
+        /* Style pour les boutons de difficulté */
+        .difficulty-btn {
+            flex-grow: 1;
+            padding: 0.75rem 0.5rem;
+            font-size: 0.75rem; /* text-xs */
+            font-weight: 500; /* medium */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .difficulty-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md mx-auto">
+        <!-- Titre -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Flashcards de Fiscalité</h1>
+            <p class="text-lg text-blue-600 font-medium mt-1">Chapitres 1 & 2 : BIC</p>
+        </header>
+
+        <!-- Conteneur de la carte (pour la perspective) -->
+        <div class="flashcard-container w-full h-80 md:h-96">
+            <!-- La carte qui va tourner -->
+            <div id="flashcard" class="flashcard">
+                <!-- Face Recto (Question) -->
+                <div id="flashcard-front" class="flashcard-face flashcard-front">
+                    <!-- Le contenu sera inséré par JavaScript -->
+                </div>
+                <!-- Face Verso (Réponse) -->
+                <div id="flashcard-back" class="flashcard-face flashcard-back">
+                    <!-- Le contenu sera inséré par JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Indicateur (supprimé, car l'ordre est aléatoire) -->
+        <div class="text-center mt-4 h-5">
+             <!-- Espace réservé pour la hauteur -->
+        </div>
+
+        <!-- Contrôles de difficulté (cachés par défaut) -->
+        <div id="difficulty-controls" class="hidden w-full mt-4">
+            <p class="text-center text-sm text-gray-600 mb-3">Comment avez-vous trouvé cette question ?</p>
+            <div class="flex justify-between items-center w-full gap-2">
+                <button id="btn-very-easy" data-weight="1" class="difficulty-btn bg-green-100 text-green-800 border-green-200 hover:bg-green-200">Très facile</button>
+                <button id="btn-easy" data-weight="3" class="difficulty-btn bg-lime-100 text-lime-800 border-lime-200 hover:bg-lime-200">Facile</button>
+                <button id="btn-medium" data-weight="5" class="difficulty-btn bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200">Moyen</button>
+                <button id="btn-hard" data-weight="8" class="difficulty-btn bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200">Dur</button>
+                <button id="btn-very-hard" data-weight="10" class="difficulty-btn bg-red-100 text-red-800 border-red-200 hover:bg-red-200">Très dur</button>
+            </div>
+        </div>
+         
+         <p id="helper-text" class="text-center text-gray-500 text-xs mt-6">
+            Cliquez sur la carte pour voir la réponse.
+        </p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. Données (Extraites de vos PDF) ---
+            const flashcards = [
+                // --- CHAPITRE 1 ---
+                {
+                    question: "Quelle est la distinction principale entre BIC et BNC ?",
+                    answer: "<b>BIC (Art 34 CGI)</b>: Activités commerciales, industrielles, ou artisanales.<br><b>BNC (Art 92 CGI)</b>: Professions libérales, charges, offices, revenus de propriété intellectuelle."
+                },
+                {
+                    question: "Qu'est-ce qu'un BIC par nature ?",
+                    answer: "Bénéfices réalisés par des personnes physiques exerçant une profession commerciale, artisanale ou industrielle (de manière habituelle, pour son propre compte, dans un but lucratif)."
+                },
+                {
+                    question: "Donnez des exemples de BIC par détermination de la loi.",
+                    answer: "(Art 34/35 CGI) Activités assimilées : location d'établissement muni du matériel d'exploitation, location meublée (usage habituel), location-gérance de fonds de commerce."
+                },
+                {
+                    question: "Qu'est-ce qu'un BIC par attraction ?",
+                    answer: "(Art 155 CGI) Lorsqu'une activité accessoire (BNC ou BA) est connexe à l'activité BIC principale, l'ensemble des revenus est imposé en BIC."
+                },
+                {
+                    question: "Quelle est la limite entre BIC et Revenus Fonciers (RF) ?",
+                    answer: "<b>Revenus Fonciers</b>: Location de biens immobiliers NON meublés.<br><b>BIC</b>: Location de biens immobiliers MEUBLÉS."
+                },
+                {
+                    question: "Qui est imposable en BIC (exemples) ?",
+                    answer: "L'exploitant individuel (de plein droit à l'IR, option IS possible), les associés de sociétés de personnes (SNC, SCS, EURL...), les SARL de famille (sur option)."
+                },
+                {
+                    question: "Qu'est-ce que la territorialité des BIC pour un domicilié fiscal français ?",
+                    answer: "Il est redevable de l'impôt français sur son revenu total (mondial), sous réserve des conventions internationales pour éviter la double imposition."
+                },
+                {
+                    question: "Qu'est-ce que la territorialité des BIC pour un non-résident ?",
+                    answer: "Il est imposé en France uniquement sur les revenus BIC exercés en France."
+                },
+                {
+                    question: "Quels sont les 3 régimes fiscaux en BIC ?",
+                    answer: "1. Micro-BIC<br>2. Réel Simplifié<br>3. Réel Normal<br>(Le choix dépend du CA HT et de la nature de l'activité)."
+                },
+                {
+                    question: "Quels sont les seuils de CA HT pour le régime Micro-BIC ?",
+                    answer: "<b>Achat/revente & Fourniture logement</b>: ≤ 188 700 €<br><b>Prestations de services</b>: ≤ 77 700 €"
+                },
+                {
+                    question: "Quels sont les seuils de CA HT pour le régime Réel Simplifié ?",
+                    answer: "<b>Achat/revente</b>: entre 188 700 € et 840 000 €<br><b>Prestations</b>: entre 77 700 € et 254 000 €"
+                },
+                {
+                    question: "Quels sont les seuils de CA HT pour le régime Réel Normal ?",
+                    answer: "<b>Achat/revente</b>: > 840 000 €<br><b>Prestations</b>: > 254 000 €"
+                },
+                {
+                    question: "Quels sont les abattements forfaitaires en Micro-BIC ?",
+                    answer: "<b>71%</b> pour achat/revente et fourniture de logement.<br><b>50%</b> pour les prestations de services."
+                },
+                
+                // --- CHAPITRE 2 ---
+                {
+                    question: "Qu'est-ce que le principe de l'indépendance des exercices ?",
+                    answer: "(Art 36 CGI) Principe de l'annualité : le bénéfice déclaré est celui arrêté au cours de l'année (exercice comptable de 12 mois)."
+                },
+                {
+                    question: "Qu'est-ce que le principe de la comptabilité d'engagement ?",
+                    answer: "Les dettes et créances sont rattachées à l'exercice où elles deviennent certaines (dans leur principe et leur montant).<br><b>Ventes</b>: date de livraison.<br><b>Prestations</b>: date d'achèvement."
+                },
+                {
+                    question: "Qu'est-ce que le principe du nominalisme monétaire ?",
+                    answer: "Comptabilisation en euros au coût historique. Les dettes/créances en devises sont converties au cours du jour, puis réévaluées à la date de clôture (créant un écart de conversion)."
+                },
+                {
+                    question: "Quel est le traitement fiscal d'un gain de change latent à la clôture ?",
+                    answer: "Il est <b>imposé</b> (via une réintégration extra-comptable)."
+                },
+                {
+                    question: "Quel est le traitement fiscal d'une perte de change latente à la clôture ?",
+                    answer: "Elle est <b>déductible</b> (via une provision pour perte de change)."
+                },
+                {
+                    question: "Quand une vente de bien est-elle rattachée à l'exercice ?",
+                    answer: "À la <b>livraison</b>, sauf pour les ventes sous condition suspensive (rattachées à la réalisation de la condition)."
+                },
+                {
+                    question: "Quand une prestation de service est-elle rattachée à l'exercice ?",
+                    answer: "À l'<b>achèvement</b> de la prestation. (Pour les prestations continues comme un loyer, c'est au fur et à mesure)."
+                },
+                {
+                    question: "Comment sont évalués les stocks ?",
+                    answer: "Au <b>prix de revient actuel</b> (coût de production). Si la valeur à l'inventaire est plus basse, on constitue une <b>provision pour dépréciation</b>."
+                },
+                {
+                    question: "Qu'est-ce que la production immobilisée ?",
+                    answer: "Ce sont des biens produits par l'entreprise pour elle-même et qui sont immobilisés (inscrits à l'actif). C'est un produit imposable."
+                },
+                {
+                    question: "Les subventions d'équipement sont-elles imposables ?",
+                    answer: "<b>Oui</b>, l'année de la décision d'attribution. Un étalement optionnel (Art 42.7 CGI) est possible (proportionnellement à l'amortissement ou sur 10 ans/durée d'inaliénabilité)."
+                },
+                {
+                    question: "Quelles sont les 3 conditions de FOND pour la déductibilité d'une charge ?",
+                    answer: "1. Entraîner une diminution de l'actif net (pas de contrepartie à l'actif).<br>2. Constituer un acte normal de gestion.<br>3. Ne pas être exclue par une disposition du CGI."
+                },
+                {
+                    question: "Quelles sont les conditions de FORME pour la déductibilité d'une charge ?",
+                    answer: "1. Être inscrite en comptabilité.<br>2. Être exposée dans l'intérêt de l'entreprise.<br>3. Être justifiée par une facture."
+                },
+                {
+                    question: "Les loyers de crédit-bail sont-ils déductibles ?",
+                    answer: "<b>Oui</b> (charges externes), mais avec des limitations pour les véhicules de tourisme (similaires aux amortissements)."
+                },
+                {
+                    question: "Les dépenses de publicité (sponsoring, parrainage) sont-elles déductibles ?",
+                    answer: "<b>Oui</b>, si elles sont engagées dans l'intérêt direct de l'entreprise et ne sont pas excessives."
+                },
+                {
+                    question: "Quels impôts ne sont PAS déductibles ?",
+                    answer: "L'<b>IR</b> (Impôt sur le Revenu), l'<b>IS</b> (Impôt sur les Sociétés) et la part non déductible de la CSG-CRDS."
+                },
+                {
+                    question: "La rémunération du dirigeant d'une société soumise à l'IR est-elle déductible ?",
+                    answer: "<b>Non</b>. Seules ses charges sociales obligatoires sont déductibles. (Elles sont déductibles si la société est à l'IS)."
+                },
+                {
+                    question: "Les intérêts des avances en compte courant d'associé sont-ils déductibles ?",
+                    answer: "<b>Oui</b>, mais dans une double limite : le capital doit être entièrement libéré et le taux d'intérêt est plafonné (taux maximal publié)."
+                },
+                {
+                    question: "Les pénalités et amendes sont-elles déductibles ?",
+                    answer: "<b>Pénalités contractuelles</b> (ex: retard client) : OUI.<br><b>Pénalités pour contraventions légales</b> (ex: fiscales, routières) : NON (à réintégrer)."
+                },
+                {
+                    question: "Qu'est-ce qu'un bien amortissable ?",
+                    answer: "Un bien utilisé sur plusieurs cycles d'exploitation, appartenant à l'entreprise, inscrit au bilan, et qui se déprécie avec le temps."
+                },
+                {
+                    question: "Comment est calculée la Valeur Nette Comptable (VNC) d'un bien amortissable ?",
+                    answer: "VNC = Valeur d'acquisition - Somme des amortissements comptables."
+                },
+                {
+                    question: "Quelles sont les conditions pour utiliser l'amortissement dégressif ?",
+                    answer: "1. Le bien doit être <b>neuf</b>.<br>2. Sa durée d'utilisation doit être d'au moins <b>3 ans</b>.<br>3. Il doit figurer sur la liste (Art 22 annexe 2 CGI)."
+                },
+                {
+                    question: "Quels sont les coefficients de l'amortissement dégressif ?",
+                    answer: "<b>1.25</b> (3-4 ans)<br><b>1.75</b> (5-6 ans)<br><b>2.25</b> (> 6 ans)"
+                },
+                {
+                    question: "La déduction des amortissements des véhicules de tourisme est-elle limitée ?",
+                    answer: "<b>Oui</b>. La déduction est plafonnée (selon date d'acquisition et taux de CO2). L'excédent non déductible doit être réintégré extra-comptablement."
+                },
+                {
+                    question: "Qu'est-ce qu'un amortissement irrégulièrement différé ?",
+                    answer: "Un amortissement non comptabilisé alors qu'il aurait dû l'être. Le droit à déduction est <b>perdu</b> (mais pris en compte dans le calcul de la plus-value)."
+                },
+                {
+                    question: "Quelles sont les conditions de fond pour déduire une provision ?",
+                    answer: "1. Perte ou charge nettement précisée.<br>2. Probable (et non juste éventuelle).<br>3. Fait générateur né dans l'exercice.<br>4. Couvrir une charge fiscalement déductible."
+                },
+                {
+                    question: "Une provision pour licenciement économique est-elle déductible ?",
+                    answer: "<b>Non</b>. (Seule celle pour motif personnel est admise si la procédure a débuté)."
+                },
+                {
+                    question: "Une provision pour charge de retraite est-elle déductible ?",
+                    answer: "<b>Non</b>, jamais. (Elles sont constituées librement par l'entreprise)."
+                },
+                {
+                    question: "Qu'est-ce qu'une provision réglementée (ex: hausse des prix) ?",
+                    answer: "Une provision à caractère fiscal offrant un avantage temporaire. Ex: Provision pour hausse des prix (si hausse > 10%), rapportée au résultat au plus tard le 6e exercice suivant."
+                },
+                {
+                    question: "Comment est imposée une Plus-Value (PV) nette à Court Terme (CT) ?",
+                    answer: "Elle est imposable au <b>taux normal</b> (intégrée au résultat d'exploitation)."
+                },
+                {
+                    question: "Comment est imposée une Plus-Value (PV) nette à Long Terme (LT) ?",
+                    answer: "Elle est imposée au <b>taux réduit</b> (modalités selon régime IR ou IS)."
+                },
+                {
+                    question: "Comment s'impute une Moins-Value (MV) nette à Court Terme (CT) ?",
+                    answer: "Elle s'impute directement sur le <b>bénéfice d'exploitation</b> de l'exercice."
+                },
+                {
+                    question: "Comment s'impute une Moins-Value (MV) nette à Long Terme (LT) ?",
+                    answer: "Elle est imputable <b>uniquement</b> sur les Plus-Values nettes à Long Terme des <b>10 exercices suivants</b>."
+                },
+                {
+                    question: "Quel est le régime spécial pour les produits de la propriété intellectuelle (brevets) ?",
+                    answer: "Les produits de cession de brevets (acquis depuis +2 ans) et les concessions de licence bénéficient du régime des <b>plus-values à long terme</b> (taux réduit)."
+                }
+            ];
+
+            // --- 2. État de l'application ---
+            let deck = [];
+            let currentCardIndex = 0;
+            let isFlipped = false;
+
+            // --- 3. Références DOM ---
+            const flashcard = document.getElementById('flashcard');
+            const flashcardFront = document.getElementById('flashcard-front');
+            const flashcardBack = document.getElementById('flashcard-back');
+            const difficultyControls = document.getElementById('difficulty-controls');
+            const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+            const helperText = document.getElementById('helper-text');
+
+            // --- 4. Fonctions ---
+
+            /**
+             * Initialise le "deck" de cartes avec un poids par défaut.
+             */
+            function initializeApp() {
+                // Crée le deck de révision. Chaque carte a un poids initial de 5 (Moyen).
+                deck = flashcards.map((card, index) => ({
+                    ...card,
+                    originalIndex: index,
+                    weight: 5 // Poids initial, 5 = Moyen
+                }));
+                showNextCard();
+            }
+            
+            /**
+             * Sélectionne la prochaine carte en utilisant un tirage pondéré.
+             */
+            function showNextCard() {
+                // 1. Calculer le poids total du deck
+                let totalWeight = deck.reduce((acc, card) => acc + card.weight, 0);
+                
+                // 2. Générer un nombre aléatoire entre 0 et le poids total
+                let randomWeight = Math.random() * totalWeight;
+                
+                // 3. Trouver la carte correspondant à ce poids
+                let selectedIndex = -1;
+                for (let i = 0; i < deck.length; i++) {
+                    randomWeight -= deck[i].weight;
+                    if (randomWeight <= 0) {
+                        selectedIndex = i;
+                        break;
+                    }
+                }
+                
+                if (selectedIndex === -1) {
+                    // Sécurité au cas où (ne devrait pas arriver)
+                    selectedIndex = Math.floor(Math.random() * deck.length);
+                }
+                
+                currentCardIndex = selectedIndex;
+                updateFlashcard(currentCardIndex);
+            }
+
+            /**
+             * Met à jour le contenu de la carte et réinitialise son état.
+             */
+            function updateFlashcard(index) {
+                const card = deck[index];
+                flashcardFront.innerHTML = `<span class="text-xl md:text-2xl font-semibold">${card.question}</span>`;
+                flashcardBack.innerHTML = `<span class="text-base md:text-lg">${card.answer}</span>`;
+                
+                // Réinitialiser la carte (la mettre côté question)
+                if (isFlipped) {
+                    flipCard(); // Retourne la carte si elle était sur la réponse
+                } else {
+                    // S'assurer que les contrôles sont cachés si la carte n'était pas retournée
+                    difficultyControls.classList.add('hidden');
+                    helperText.classList.remove('hidden');
+                }
+            }
+
+            /**
+             * Gère le clic sur un bouton de difficulté.
+             */
+            function handleDifficultyClick(event) {
+                // 1. Récupérer le nouveau poids depuis l'attribut data-weight
+                const newWeight = parseInt(event.currentTarget.dataset.weight, 10);
+                
+                // 2. Mettre à jour le poids de la carte actuelle dans le deck
+                deck[currentCardIndex].weight = newWeight;
+                
+                // 3. Afficher la prochaine carte (sélection pondérée)
+                showNextCard();
+            }
+
+            /**
+             * Retourne la carte (animation) et affiche/cache les contrôles.
+             */
+            function flipCard() {
+                isFlipped = !isFlipped;
+                flashcard.classList.toggle('is-flipped');
+                
+                if (isFlipped) {
+                    // La carte est sur la face "Réponse"
+                    difficultyControls.classList.remove('hidden');
+                    helperText.classList.add('hidden');
+                } else {
+                    // La carte est sur la face "Question"
+                    difficultyControls.classList.add('hidden');
+                    helperText.classList.remove('hidden');
+                }
+            }
+
+            // --- 5. Écouteurs d'événements ---
+
+            // Cliquer sur la carte pour la retourner
+            flashcard.addEventListener('click', flipCard);
+
+            // Ajouter un écouteur pour chaque bouton de difficulté
+            difficultyButtons.forEach(button => {
+                button.addEventListener('click', handleDifficultyClick);
+            });
+
+            // --- 6. Initialisation ---
+            initializeApp(); // Démarrer l'application
+
+        });
+    </script>
+</body>
+</html>
